@@ -76,6 +76,16 @@ def nb_params_from_mean(mean, dispersion_ratio):
     return n, p
 
 
+def canine_euth_dose_ml(weight_kg, base_ml, base_weight_kg, ml_per_10lb):
+    """Tiered euthanasia dosing: flat base dose up to base_weight_kg,
+    then +ml_per_10lb for every additional 10 lbs of body weight above that."""
+    if weight_kg <= base_weight_kg:
+        return base_ml
+    extra_kg = weight_kg - base_weight_kg
+    extra_lb = extra_kg * 2.20462
+    return base_ml + (extra_lb / 10.0) * ml_per_10lb
+
+
 def simulate_forecast_week(temps, rng):
     """Simulate one 7-day scenario, returning total deaths by category."""
     category_totals = {cat: 0 for cat in DEATH_ALLOCATION}
@@ -125,11 +135,12 @@ st.caption("Adjust these to match your protocols. Defaults reflect standard prac
 
 col1, col2 = st.columns(2)
 with col1:
-    euth_ml_per_kg = st.number_input("Euthanasia solution (mL/kg, canine)", min_value=1.0, value=10.0, step=0.5)
-    feline_euth_ml = st.number_input("Euthanasia solution, feline (flat mL/case)", min_value=0.5, value=3.0, step=0.5)
+    st.caption("Canine euthanasia dosing: flat base dose up to a weight threshold, then +X mL per additional 10 lbs. Propofol usage is assumed to match euthanasia solution volume.")
+    euth_base_ml = st.number_input("Base dose (mL, up to threshold)", min_value=0.5, value=3.0, step=0.5)
+    euth_base_weight_kg = st.number_input("Weight threshold (kg)", min_value=1.0, value=15.0, step=0.5)
+    euth_ml_per_10lb = st.number_input("Additional mL per 10 lbs over threshold", min_value=0.0, value=1.0, step=0.5)
 with col2:
-    propofol_ml_per_kg = st.number_input("Propofol (mL/kg, canine)", min_value=1.0, value=10.0, step=0.5)
-    feline_propofol_ml = st.number_input("Propofol, feline (flat mL/case)", min_value=0.5, value=3.0, step=0.5)
+    feline_euth_ml = st.number_input("Euthanasia solution, feline (flat mL/case)", min_value=0.5, value=3.0, step=0.5)
 
 st.subheader("Flat Per-Case Supplies")
 col3, col4, col5 = st.columns(3)
@@ -162,12 +173,14 @@ if st.button("Run Forecast", type="primary"):
 
         expected_euth_ml = (
             avg_totals["Feline"] * feline_euth_ml
-            + sum(avg_totals[cat] * CANINE_WEIGHTS_KG[cat] * euth_ml_per_kg for cat in CANINE_WEIGHTS_KG)
+            + sum(
+                avg_totals[cat] * canine_euth_dose_ml(
+                    CANINE_WEIGHTS_KG[cat], euth_base_ml, euth_base_weight_kg, euth_ml_per_10lb
+                )
+                for cat in CANINE_WEIGHTS_KG
+            )
         )
-        expected_propofol_ml = (
-            avg_totals["Feline"] * feline_propofol_ml
-            + sum(avg_totals[cat] * CANINE_WEIGHTS_KG[cat] * propofol_ml_per_kg for cat in CANINE_WEIGHTS_KG)
-        )
+        expected_propofol_ml = expected_euth_ml
         expected_catheters = total_expected * catheters_per_case
         expected_flush_ml = total_expected * flush_ml_per_case
         expected_bags = total_expected * bags_per_case

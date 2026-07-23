@@ -4,7 +4,7 @@ A Monte Carlo simulation tool that estimates expected euthanasia-related
 consumable usage for the coming week, adjusted for forecasted temperature,
 and compares that estimate against current stock on hand.
 
-**Live app:** *(add your Streamlit deployment URL here once deployed)*
+**Live app:** *([Shelter Medical Supply Forecaster](https://shelter-supply-forecaster.streamlit.app/))*
 
 ---
 

@@ -135,7 +135,7 @@ st.caption("Adjust these to match your protocols. Defaults reflect standard prac
 
 col1, col2 = st.columns(2)
 with col1:
-    st.caption("Canine euthanasia dosing: flat base dose up to a weight threshold, then +X mL per additional 10 lbs. Propofol usage is assumed to match euthanasia solution volume.")
+    st.caption("Canine euthanasia dosing: flat base dose up to a weight threshold, then +X mL per additional 10 lbs.  This is intentially a slightly high estimate for ordering purposes. Propofol usage is assumed to match euthanasia solution volume.")
     euth_base_ml = st.number_input("Base dose (mL, up to threshold)", min_value=0.5, value=3.0, step=0.5)
     euth_base_weight_kg = st.number_input("Weight threshold (kg)", min_value=1.0, value=15.0, step=0.5)
     euth_ml_per_10lb = st.number_input("Additional mL per 10 lbs over threshold", min_value=0.0, value=1.0, step=0.5)

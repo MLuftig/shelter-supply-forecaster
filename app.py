@@ -192,9 +192,11 @@ if st.button("Run Forecast", type="primary"):
                  delta_color="normal" if stock_bags >= expected_bags else "inverse")
  
     st.subheader("Expected Cases by Category")
+    st.caption("Average expected number of cases over the 7-day forecast window.")
     st.bar_chart(avg_totals)
  
     st.subheader("Expected Cases by Species")
+    st.caption("Average expected number of cases over the 7-day forecast window.")
     canine_total = sum(avg_totals[cat] for cat in CANINE_WEIGHTS_KG)
     feline_total = avg_totals["Feline"]
     species_totals = {"Canine": canine_total, "Feline": feline_total}
